@@ -46,18 +46,25 @@ namespace MeasuringDevice
 namespace OOP5_1
 {
 
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-
     public class DeviceController
     {
+        public DeviceController(DeviceType measurementType)
+        {
+
+        }
+
+        public void StopDevice()
+        {
+
+        }
+
+
         public int TakeMeasurement()
         {
             return 1;
         }
     }
-    public enum Units {Metric,Impretial};
+    public enum Units {Metric, Imperial };
     public enum DeviceType {LENGTH,MASS}
 
     public class MeasureLengthDevice: IMeasuringDevice
@@ -66,22 +73,45 @@ namespace OOP5_1
         private int[] dataCaptured;
         private int mostRecentMeasure;
         private DeviceController controller;
-        private DeviceType measurementType;
+        private const DeviceType measurementType = DeviceType.LENGTH;
+
+        public MeasureLengthDevice(Units unitsToUse) {
+            this.unitsToUse = unitsToUse;
+        }
+
         public decimal MetricValue()
         {
-            return 1;
+            if (unitsToUse == Units.Metric)
+            {
+                return mostRecentMeasure;
+            }
+            else
+            {
+                return Convert.ToDecimal(mostRecentMeasure * 25.4);
+            }
         }
-        public decimal ImperialValue() { 
-            
-            return 1; 
+        public decimal ImperialValue() {
+            if (unitsToUse == Units.Imperial)
+            {
+                return mostRecentMeasure;
+            }
+            else
+            {
+                return Convert.ToDecimal(mostRecentMeasure * 0.03937);
+            }
         }
         public void StartCollecting() {
-        
+            controller= new DeviceController(measurementType);
         }
-        public void StopCollecting() { }
+        public void StopCollecting() {
+            if (controller!= null)
+            {
+                controller.StopDevice();
+                controller = null;
+            }
+        }
         public int[] GetRawData() {
-            int[] data= new int[1];
-            return data;
+            return dataCaptured;
         }
         public int[] GetMostRecentMeasure() {
             int[] ints  = new int[1];
@@ -109,6 +139,7 @@ namespace OOP5_1
                 }
             });
         }
+
 
     }
     public partial class MainWindow : Window
