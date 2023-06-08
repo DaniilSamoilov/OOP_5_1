@@ -48,9 +48,10 @@ namespace OOP5_1
 
     public class DeviceController
     {
+        public DeviceType measurementType;
         public DeviceController(DeviceType measurementType)
         {
-
+            this.measurementType = measurementType;
         }
 
         public void StopDevice()
@@ -61,13 +62,19 @@ namespace OOP5_1
 
         public int TakeMeasurement()
         {
-            return 1;
+            Random rnd = new Random();
+            return rnd.Next(1,11);
+        }
+
+        public static DeviceController StartDevice(DeviceType measurementType)
+        {
+            return new DeviceController(measurementType);
         }
     }
     public enum Units {Metric, Imperial };
     public enum DeviceType {LENGTH,MASS}
 
-    public class MeasureLengthDevice: IMeasuringDevice
+    public class MeasureLengthDevice: IMeasur   ingDevice
     {
         private Units unitsToUse;
         private int[] dataCaptured;
@@ -100,9 +107,7 @@ namespace OOP5_1
                 return Convert.ToDecimal(mostRecentMeasure * 0.03937);
             }
         }
-        public void StartCollecting() {
-            controller= new DeviceController(measurementType);
-        }
+        
         public void StopCollecting() {
             if (controller!= null)
             {
@@ -138,16 +143,59 @@ namespace OOP5_1
                     }
                 }
             });
+
         }
 
-
+        public void StartCollecting()
+        {
+            controller = new DeviceController(measurementType);
+            GetMeasurements();
+        }
     }
     public partial class MainWindow : Window
     {
-
+        MeasureLengthDevice mydevice;
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            mydevice = new MeasureLengthDevice((Units)Enum.Parse(typeof(Units), Units_select.Text));
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            mydevice.StartCollecting();
+        }
+
+        private void get_raw_data_btn_Click(object sender, RoutedEventArgs e)
+        {
+            int[] mydata = mydevice.GetRawData();
+            data_captured.Items.Clear();
+            for (int i = 0; i < mydata.Length; i++)
+            {
+                data_captured.Items.Add(mydata[i].ToString());
+            }
+        }
+
+        private void stop_collecting_btn_Click(object sender, RoutedEventArgs e)
+        {
+            mydevice.StopCollecting();
+        }
+
+        private void get_imperial_value_btn_Click(object sender, RoutedEventArgs e)
+        {
+
+            decimal mydata = mydevice.ImperialValue();
+            MessageBox.Show((mydata.ToString()));
+        }
+
+        private void get_metric_value_btn_Click(object sender, RoutedEventArgs e)
+        {
+            decimal mydata = mydevice.MetricValue();
+           MessageBox.Show((mydata.ToString()));
         }
     }
 }

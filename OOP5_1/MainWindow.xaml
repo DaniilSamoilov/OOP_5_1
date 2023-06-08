@@ -8,17 +8,22 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="61*"/>
-            <ColumnDefinition Width="11*"/>
-            <ColumnDefinition Width="328*"/>
+            <ColumnDefinition Width="122*"/>
+            <ColumnDefinition Width="13*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="656*"/>
         </Grid.ColumnDefinitions>
-        <Button Content="createInstance" HorizontalAlignment="Left" Margin="16,11,0,0" VerticalAlignment="Top" Grid.Column="2"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="277,82,0,0" VerticalAlignment="Top" Grid.Column="2"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="56,92,0,0" VerticalAlignment="Top" Grid.Column="2"/>
-        <ComboBox x:Name="Units_select" HorizontalAlignment="Left" Margin="28,10,0,0" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="3">
+        <Button x:Name="create_instance" Content="createInstance" HorizontalAlignment="Left" Margin="16,11,0,0" VerticalAlignment="Top" Grid.Column="3" Click="Button_Click"/>
+        <Button x:Name="get_metric_value_btn" Content="Get Metric Value" HorizontalAlignment="Left" Margin="61,127,0,0" VerticalAlignment="Top" Grid.Column="3" Click="get_metric_value_btn_Click"/>
+        <Button x:Name="start_collecting_btn" Content="StartCollecting" HorizontalAlignment="Left" Margin="31,50,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
+        <ComboBox x:Name="Units_select" HorizontalAlignment="Left" Margin="28,10,0,0" VerticalAlignment="Top" Width="120" Grid.ColumnSpan="4">
             <ComboBoxItem Content="Imperial"/>
             <ComboBoxItem Content="Metric"/>
         </ComboBox>
+        <ListBox x:Name="data_captured" d:ItemsSource="{d:SampleData ItemCount=5}" Grid.ColumnSpan="4" Margin="28,75,650,-75"/>
+        <Button x:Name="get_raw_data_btn" Grid.Column="1" Content="Get Raw Data" HorizontalAlignment="Left" Margin="6,50,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3" Click="get_raw_data_btn_Click"/>
+        <Button x:Name="get_imperial_value_btn" Grid.Column="3" Content="Get Imperial Value" HorizontalAlignment="Left" Margin="56,97,0,0" VerticalAlignment="Top" Click="get_imperial_value_btn_Click"/>
+        <Button x:Name="stop_collecting_btn" Grid.Column="3" Content="Stop Collecting" HorizontalAlignment="Left" Margin="124,50,0,0" VerticalAlignment="Top" Click="stop_collecting_btn_Click"/>
 
     </Grid>
 </Window>
