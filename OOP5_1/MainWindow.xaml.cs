@@ -1,6 +1,8 @@
 ﻿using MeasuringDevice;
+using OOP5_1;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,14 +19,15 @@ namespace MeasuringDevice
 {
     public interface IMeasuringDevice
     {
-        /// <summary>/// Converts the raw data collected by the measuring device into a metric value
+        /// <summary>
+        /// Converts the raw data collected by the measuring device into a metric value.
         /// </summary>
-        ///<returns>The latest measurement from the device converted to metric units.</returns>
+        /// <returns>The latest measurement from the device converted to metric units.</returns>
         decimal MetricValue();
         /// <summary>
         /// Converts the raw data collected by the measuring device into an imperial value.
         /// </summary>
-        ///<returns>The latest measurement from the device converted to imperial units.</returns>
+        /// <returns>The latest measurement from the device converted to imperial units.</returns>
         decimal ImperialValue();
         /// <summary>
         /// Starts the measuring device.
@@ -34,12 +37,43 @@ namespace MeasuringDevice
         /// Stops the measuring device. 
         /// </summary>
         void StopCollecting();
-        /// <summary>
+        /// <summary
         /// Enables access to the raw data from the device in whatever units are native to the device
         /// </summary>
         /// <returns>The raw data from the device in native format.</returns>
         int[] GetRawData();
+        /// <summary>
+        /// Returns the file name of the logging file for the device.
+        /// </summary>
+        /// <returns>The file name of the logging file.</returns>
+        string GetLoggingFile();
+        /// <summary>
+        /// Gets the Units used natively by the device.
+        /// </summary>
+        Units UnitsToUse { get; }
+        /// <summary>
+        /// Gets an array of the measurements taken by the device.
+        /// </summary>
+        int[] DataCaptured { get; }
+        /// <summary>
+        /// Gets the most recent measurement taken by the device.
+        /// </summary>
+        int MostRecentMeasure { get; }
+        /// <summary>
+        /// Gets or sets the name of the logging file used. 
+        /// If the logging file changes this closes the current file and creates the new file
+        /// </summary>
+        string LoggingFileName { get; set; }
     }
+    interface IEventEnabledMeasuringDevice : IMeasuringDevice
+    {
+        event EventHandler NewMeasurementTaken;
+        // Event that fires every heartbeat.
+        event HeartBeatEventHandler HeartBeat;
+        // Read only heartbeat interval - set in constructor.
+        int HeartBeatInterval { get; }
+    }
+
 }
 
 
@@ -73,41 +107,60 @@ namespace OOP5_1
     }
     public enum Units {Metric, Imperial };
     public enum DeviceType {LENGTH,MASS}
+    public delegate void HeartBeatEventHandler();
 
-    public class MeasureLengthDevice: IMeasur   ingDevice
+
+
+    public class MeasureLengthDevice: IEventEnabledMeasuringDevice
     {
-        private Units unitsToUse;
-        private int[] dataCaptured;
-        private int mostRecentMeasure;
+        public event HeartBeatEventHandler HeartBeat;
+        public event EventHandler NewMeasurementTaken;
+        public int HeartBeatInterval { get; }
+
+        public Units UnitsToUse { get; }
+        public int[] DataCaptured { get; set; }
+        public int MostRecentMeasure { get; set; }
         private DeviceController controller;
         private const DeviceType measurementType = DeviceType.LENGTH;
+        public string LoggingFileName { get; set; }
+        
 
-        public MeasureLengthDevice(Units unitsToUse) {
-            this.unitsToUse = unitsToUse;
+        public void OnMeasurementTaken()
+        {
+            if (NewMeasurementTaken!=null)
+            {
+
+            }
         }
 
+        public string GetLoggingFile()
+        {
+            return this.LoggingFileName;
+        }
+        public MeasureLengthDevice(Units unitsToUse) {
+            this.UnitsToUse = unitsToUse;
+        }
         public decimal MetricValue()
         {
-            if (unitsToUse == Units.Metric)
+            if (UnitsToUse == Units.Metric)
             {
-                return mostRecentMeasure;
+                return MostRecentMeasure;
             }
             else
             {
-                return Convert.ToDecimal(mostRecentMeasure * 25.4);
+                return Convert.ToDecimal(MostRecentMeasure * 25.4);
             }
         }
         public decimal ImperialValue() {
-            if (unitsToUse == Units.Imperial)
+            if (UnitsToUse == Units.Imperial)
             {
-                return mostRecentMeasure;
+                return MostRecentMeasure;
             }
             else
             {
-                return Convert.ToDecimal(mostRecentMeasure * 0.03937);
+                return Convert.ToDecimal(MostRecentMeasure * 0.03937);
             }
         }
-        
         public void StopCollecting() {
             if (controller!= null)
             {
@@ -116,7 +169,7 @@ namespace OOP5_1
             }
         }
         public int[] GetRawData() {
-            return dataCaptured;
+            return DataCaptured;
         }
         public int[] GetMostRecentMeasure() {
             int[] ints  = new int[1];
@@ -124,7 +177,7 @@ namespace OOP5_1
         }
         private void GetMeasurements()
         {
-            dataCaptured = new int[10];
+            DataCaptured = new int[10];
             System.Threading.ThreadPool.QueueUserWorkItem((dummy) =>
             {
                 int x = 0;
@@ -133,9 +186,9 @@ namespace OOP5_1
                 while (controller != null)
                 {
                     System.Threading.Thread.Sleep(timer.Next(1000, 5000));
-                    dataCaptured[x] = controller != null ?
-                        controller.TakeMeasurement() : dataCaptured[x];
-                    mostRecentMeasure = dataCaptured[x];
+                    DataCaptured[x] = controller != null ?
+                        controller.TakeMeasurement() : DataCaptured[x];
+                    MostRecentMeasure = DataCaptured[x];
                     x++;
                     if (x == 10)
                     {
@@ -145,7 +198,6 @@ namespace OOP5_1
             });
 
         }
-
         public void StartCollecting()
         {
             controller = new DeviceController(measurementType);
